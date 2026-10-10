@@ -1,0 +1,316 @@
+============================================================
+                EXPENSE TRACKER PROJECT
+                  LEARNING JOURNAL
+============================================================
+
+Student:
+Lucky Nawale
+
+Project:
+Expense Tracker
+
+Purpose:
+Build a real web application while learning and practicing
+HTML, CSS, JavaScript, Git, GitHub and deployment.
+
+============================================================
+PHASE 0 — PROJECT SETUP
+============================================================
+
+Status: COMPLETED
+
+Goal:
+Set up the local project and connect it with GitHub.
+
+------------------------------------------------------------
+PROJECT FILES
+------------------------------------------------------------
+
+index.html
+→ Contains the structure of the web page.
+
+style.css
+→ Contains the styling of the web page.
+
+script.js
+→ Contains the JavaScript logic.
+
+README.md
+→ Project documentation for GitHub.
+
+LEARNING_JOURNAL.txt
+→ Personal documentation of my learning journey,
+  commands, concepts, mistakes and solutions.
+
+============================================================
+GIT SETUP
+============================================================
+
+Command:
+
+git init
+
+Purpose:
+
+Initializes Git inside the current project folder.
+
+Result:
+
+The expense-tracker folder became a local Git repository.
+
+------------------------------------------------------------
+
+Command:
+
+git status
+
+Purpose:
+
+Shows the current state of the Git repository.
+
+It tells me:
+- Which branch I am on
+- Which files are untracked
+- Which files are modified
+- Which files are ready to be committed
+
+------------------------------------------------------------
+
+Command:
+
+git add .
+
+Purpose:
+
+Stages all files in the current directory for the next commit.
+
+------------------------------------------------------------
+
+Command:
+
+git commit -m "Initial commit"
+
+Purpose:
+
+Creates a permanent checkpoint of the staged project files.
+
+Initial local commit:
+
+d7edce9
+
+============================================================
+CONNECTING GITHUB
+============================================================
+
+Command:
+
+git remote add origin <repository-url>
+
+Purpose:
+
+Connects my local Git repository to the GitHub repository.
+
+Remote name:
+
+origin
+
+GitHub repository:
+
+https://github.com/LuckyNawale/Expense-tracker-app
+
+------------------------------------------------------------
+
+Command:
+
+git remote -v
+
+Purpose:
+
+Verifies the URL of the remote repository used for
+fetching and pushing.
+
+============================================================
+BRANCH
+============================================================
+
+Command:
+
+git branch -M main
+
+Purpose:
+
+Renames the current branch to main.
+
+Current branch:
+
+main
+
+============================================================
+PROBLEM ENCOUNTERED
+============================================================
+
+When I tried:
+
+git push -u origin main
+
+Git rejected the push.
+
+Reason:
+
+The GitHub repository already had its own commit history,
+while my local repository had a different history.
+
+Git therefore prevented the remote history from being
+overwritten accidentally.
+
+------------------------------------------------------------
+INVESTIGATION
+------------------------------------------------------------
+
+Command:
+
+git fetch origin
+
+Purpose:
+
+Downloads information about the remote repository without
+merging the remote changes into my working files.
+
+------------------------------------------------------------
+
+Command:
+
+git log --oneline --all --decorate
+
+Purpose:
+
+Shows the commit history from the local and remote branches.
+
+I discovered that there were two separate initial commits:
+
+Local:
+d7edce9
+
+Remote:
+66b91f4
+
+They were unrelated histories.
+
+============================================================
+SOLVING THE PROBLEM
+============================================================
+
+Command:
+
+git merge origin/main --allow-unrelated-histories
+
+Purpose:
+
+Combines the local history and the existing GitHub history
+even though they were created independently.
+
+The merge created:
+
+c93998d
+
+Merge remote-tracking branch 'origin/main'
+
+The existing README.md from GitHub was successfully
+combined with my local project.
+
+------------------------------------------------------------
+
+Command:
+
+git log --oneline --decorate --graph --all
+
+Purpose:
+
+Displays the commit history as a visual graph.
+
+Final history:
+
+*   c93998d  Merge remote-tracking branch 'origin/main'
+|\
+| * 66b91f4  Initial commit
+* d7edce9    Initial commit
+
+============================================================
+FINAL PUSH
+============================================================
+
+Command:
+
+git push -u origin main
+
+Purpose:
+
+Uploads my local commits to the GitHub repository.
+
+The push was successful.
+
+GitHub repository:
+
+https://github.com/LuckyNawale/Expense-tracker-app
+
+------------------------------------------------------------
+
+Final verification:
+
+git status
+
+Result:
+
+nothing to commit, working tree clean
+
+This means the local working directory was clean and
+everything had been successfully committed.
+
+============================================================
+LESSONS LEARNED
+============================================================
+
+1. Git tracks changes to my project.
+
+2. A commit is a checkpoint in project history.
+
+3. A remote connects my local repository with GitHub.
+
+4. "origin" is the conventional name for the GitHub remote.
+
+5. "main" is the branch we are using.
+
+6. git fetch downloads information about remote changes
+   without automatically merging them.
+
+7. git log helps inspect project history.
+
+8. Git protects the remote repository when histories differ.
+
+9. I should not blindly use git push --force when a push
+   is rejected.
+
+10. Git history should be inspected before deciding how
+    to resolve a conflict or rejected push.
+
+============================================================
+PHASE 0 STATUS
+============================================================
+
+Git setup:              COMPLETED
+GitHub connection:      COMPLETED
+Initial commit:         COMPLETED
+Remote history merge:   COMPLETED
+First push:             COMPLETED
+
+============================================================
+NEXT PHASE
+============================================================
+
+PHASE 1 — EXPENSE TRACKER V1
+
+First milestone:
+
+HTML structure + HTML/CSS refresh
+
+============================================================

@@ -2,19 +2,12 @@ console.log("Expense tracker started");
 
 let addButton = document.getElementById("addButton");
 
-addButton.addEventListener("click", function(){
-    console.log("Button clicked");
-        
-})
+function addExpense(){
+    let expenseName = document.getElementById("expenseName").value;
+    let expenseAmount = document.getElementById("expenseAmount").value;
 
-function calculateTotal(amount1, amount2){
-    return amount1 + amount2
+    console.log(expenseName);
+    console.log(expenseAmount);
 }
-let total = calculateTotal(200, 300);
-console.log(total);
+addButton.addEventListener("click", addExpense)
 
-
-
-
-
-console.log("Expense tracker ended");
