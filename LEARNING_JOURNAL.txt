@@ -314,3 +314,6 @@ First milestone:
 HTML structure + HTML/CSS refresh
 
 ============================================================
+
+
+adding some points 
