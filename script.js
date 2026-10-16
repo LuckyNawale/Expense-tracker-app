@@ -44,9 +44,17 @@ const categoryFilter = document.getElementById("categoryFilter");
 const expenseList = document.getElementById("expenseList");
 const emptyState = document.getElementById("emptyState");
 const toast = document.getElementById("toast");
+const editDialog = document.getElementById("editExpenseDialog");
+const editForm = document.getElementById("editExpenseForm");
+const editNameInput = document.getElementById("editExpenseName");
+const editAmountInput = document.getElementById("editExpenseAmount");
+const editCategoryInput = document.getElementById("editExpenseCategory");
+const editDateInput = document.getElementById("editExpenseDate");
 
 let expenses = loadExpenses();
 let toastTimer;
+let editingExpenseId = null;
+let editTrigger = null;
 
 function todayAsInputValue() {
   const today = new Date();
@@ -240,16 +248,40 @@ function createExpenseRow(expense) {
   );
 
   const amount = createElement("span", "expense-amount", `− ${formatCurrency(expense.amount)}`);
+  const actions = createElement("div", "expense-actions");
+  const editButton = createElement("button", "edit-button");
+  editButton.type = "button";
+  editButton.setAttribute("aria-label", `Edit ${expense.name}`);
+  editButton.title = "Edit expense";
+  editButton.dataset.action = "edit";
+  editButton.dataset.expenseId = expense.id;
+  editButton.innerHTML =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 5 5 5M4 20l4.5-1 10-10a2.12 2.12 0 0 0-3-3l-10 10L4 20Z" /></svg>';
+
   const deleteButton = createElement("button", "delete-button");
   deleteButton.type = "button";
   deleteButton.setAttribute("aria-label", `Delete ${expense.name}`);
   deleteButton.title = "Delete expense";
+  deleteButton.dataset.action = "delete";
   deleteButton.dataset.expenseId = expense.id;
   deleteButton.innerHTML =
     '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3m3 0-.8 13H6.8L6 7m4 4v5m4-5v5" /></svg>';
 
-  row.append(icon, details, amount, deleteButton);
+  actions.append(editButton, deleteButton);
+  row.append(icon, details, amount, actions);
   return row;
+}
+
+function openEditDialog(expense, trigger) {
+  editingExpenseId = expense.id;
+  editTrigger = trigger;
+  editForm.reset();
+  editNameInput.value = expense.name;
+  editAmountInput.value = String(expense.amount);
+  editCategoryInput.value = expense.category;
+  editDateInput.value = expense.date;
+  editDialog.showModal();
+  editNameInput.focus();
 }
 
 function renderBreakdown() {
@@ -345,24 +377,89 @@ form.addEventListener("submit", (event) => {
 });
 
 expenseList.addEventListener("click", (event) => {
-  const deleteButton = event.target.closest("button[data-expense-id]");
-  if (!deleteButton) {
+  const actionButton = event.target.closest("button[data-expense-id]");
+  if (!actionButton) {
     return;
   }
 
-  const expense = expenses.find((item) => item.id === deleteButton.dataset.expenseId);
-  if (!expense || !window.confirm(`Delete "${expense.name}" from your expenses?`)) {
+  const expense = expenses.find((item) => item.id === actionButton.dataset.expenseId);
+  if (!expense) {
     return;
   }
 
-  const nextExpenses = expenses.filter((item) => item.id !== expense.id);
+  if (actionButton.dataset.action === "edit") {
+    openEditDialog(expense, actionButton);
+    return;
+  }
+
+  if (actionButton.dataset.action === "delete") {
+    if (!window.confirm(`Delete "${expense.name}" from your expenses?`)) {
+      return;
+    }
+
+    const nextExpenses = expenses.filter((item) => item.id !== expense.id);
+    if (!saveExpenses(nextExpenses)) {
+      return;
+    }
+
+    expenses = nextExpenses;
+    render();
+    showToast("Expense deleted.");
+  }
+});
+
+editForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const expenseIndex = expenses.findIndex((expense) => expense.id === editingExpenseId);
+  if (expenseIndex === -1) {
+    editDialog.close();
+    showToast("This expense is no longer available to edit.", true);
+    return;
+  }
+
+  const amount = Number(editAmountInput.value);
+  if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) {
+    editAmountInput.setCustomValidity("Enter an amount greater than ₹0 and no more than ₹10 crore.");
+    editAmountInput.reportValidity();
+    editAmountInput.setCustomValidity("");
+    return;
+  }
+
+  const updatedExpense = {
+    ...expenses[expenseIndex],
+    name: editNameInput.value.trim(),
+    amount,
+    category: editCategoryInput.value,
+    date: editDateInput.value,
+  };
+  if (!isValidExpense(updatedExpense)) {
+    showToast("Please check the expense details and try again.", true);
+    return;
+  }
+
+  const nextExpenses = expenses.slice();
+  nextExpenses[expenseIndex] = updatedExpense;
   if (!saveExpenses(nextExpenses)) {
     return;
   }
 
   expenses = nextExpenses;
+  editDialog.close();
   render();
-  showToast("Expense deleted.");
+  showToast("Expense updated. Your totals are up to date.");
+});
+
+document.getElementById("closeEditDialog").addEventListener("click", () => editDialog.close());
+document.getElementById("cancelEditDialog").addEventListener("click", () => editDialog.close());
+editDialog.addEventListener("close", () => {
+  if (editTrigger?.isConnected) {
+    editTrigger.focus();
+  } else {
+    searchInput.focus();
+  }
+  editTrigger = null;
+  editingExpenseId = null;
 });
 
 searchInput.addEventListener("input", renderTransactions);

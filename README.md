@@ -7,6 +7,7 @@ A responsive, browser-based expense tracker for keeping everyday spending organi
 - Dashboard totals for all expenses and the current month
 - Categorized spending breakdown
 - Search and filter recent transactions
+- Edit expense names, amounts, categories, and dates
 - Delete expenses with a confirmation step
 - Automatic saving in the browser with `localStorage`
 - Responsive layout for desktop, tablet, and mobile screens

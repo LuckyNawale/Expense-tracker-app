@@ -197,6 +197,52 @@
         <footer class="page-footer">Small steps add up. You’ve got this.</footer>
       </main>
     </div>
+    <dialog class="edit-dialog" id="editExpenseDialog" aria-labelledby="editDialogTitle">
+      <form id="editExpenseForm">
+        <div class="edit-dialog-header">
+          <div>
+            <span class="section-kicker">UPDATE DETAILS</span>
+            <h2 id="editDialogTitle">Edit expense</h2>
+            <p class="panel-subtitle">Make a change and save when you’re ready.</p>
+          </div>
+          <button class="dialog-close" id="closeEditDialog" type="button" aria-label="Close edit expense form">×</button>
+        </div>
+        <div class="field">
+          <label for="editExpenseName">What was it for?</label>
+          <input id="editExpenseName" name="name" type="text" maxlength="80" required />
+        </div>
+        <div class="field">
+          <label for="editExpenseAmount">How much?</label>
+          <div class="amount-input">
+            <span aria-hidden="true">₹</span>
+            <input id="editExpenseAmount" name="amount" type="number" min="0.01" max="100000000" step="0.01" inputmode="decimal" required />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="editExpenseCategory">Category</label>
+            <select id="editExpenseCategory" name="category" required>
+              <option value="Food & Dining">Food & Dining</option>
+              <option value="Transport">Transport</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills & Utilities">Bills & Utilities</option>
+              <option value="Entertainment">Entertainment</option>
+              <option value="Health">Health</option>
+              <option value="Education">Education</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="editExpenseDate">Date</label>
+            <input id="editExpenseDate" name="date" type="date" required />
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button class="secondary-button" id="cancelEditDialog" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Save changes</button>
+        </div>
+      </form>
+    </dialog>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>
 </html>
