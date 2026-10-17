@@ -181,6 +181,38 @@
               </form>
             </section>
 
+            <section class="panel budget-panel" id="monthlyBudget">
+              <div class="panel-header">
+                <div>
+                  <span class="section-kicker">MONTHLY PLAN</span>
+                  <h2 id="budgetHeading">Set a monthly budget</h2>
+                  <p class="panel-subtitle" id="budgetMonthLabel">Give this month’s spending a goal.</p>
+                </div>
+              </div>
+              <form id="monthlyBudgetForm" class="budget-form">
+                <div class="field">
+                  <label for="monthlyBudgetAmount">Your monthly limit</label>
+                  <div class="amount-input">
+                    <span aria-hidden="true">₹</span>
+                    <input id="monthlyBudgetAmount" name="budget" type="number" placeholder="e.g. 20000" min="0.01" max="100000000" step="0.01" inputmode="decimal" required />
+                  </div>
+                </div>
+                <button class="primary-button submit-button" id="saveBudgetButton" type="submit">Set monthly budget <span aria-hidden="true">→</span></button>
+              </form>
+              <div class="budget-progress-section" id="budgetProgressSection" hidden>
+                <div class="budget-amounts">
+                  <span>Spent this month</span>
+                  <strong id="budgetProgressAmounts"></strong>
+                </div>
+                <div class="budget-progress-track" id="budgetProgressTrack" role="progressbar" aria-label="Monthly budget used" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="budget-progress-fill" id="budgetProgressFill"></div>
+                </div>
+                <p class="budget-status" id="budgetStatus" aria-live="polite"></p>
+                <button class="budget-clear-button" id="clearMonthlyBudget" type="button" hidden>Remove this month’s budget</button>
+              </div>
+              <p class="budget-empty" id="budgetEmpty">Set a monthly limit to see how your spending compares.</p>
+            </section>
+
             <section class="panel breakdown-panel">
               <div class="panel-header">
                 <div>

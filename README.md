@@ -5,6 +5,7 @@ A responsive, browser-based expense tracker for keeping everyday spending organi
 ## Features
 
 - Dashboard totals for all expenses and the current month
+- Set, update, and remove a monthly spending budget with a live progress indicator
 - Categorized spending breakdown
 - Search and filter recent transactions
 - Edit expense names, amounts, categories, and dates
@@ -17,10 +18,10 @@ A responsive, browser-based expense tracker for keeping everyday spending organi
 
 Open `index.html` in a modern browser. No build tools or dependencies are required. For the most reliable browser storage behavior, you can also serve this folder with a local static web server.
 
-Expenses stay in the browser on the current device; they are not uploaded to a server or synchronized between devices. Clearing the browser's site data removes saved expenses.
+Expenses and monthly budgets stay in the browser on the current device; they are not uploaded to a server or synchronized between devices. Clearing the browser's site data removes saved data.
 
 ## Project files
 
 - `index.html` — accessible page structure
 - `style.css` — responsive visual design
-- `script.js` — expense management, summaries, search, filters, and browser storage
+- `script.js` — expense management, summaries, budgets, search, filters, and browser storage

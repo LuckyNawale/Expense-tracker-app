@@ -1,6 +1,8 @@
 "use strict";
 
 const STORAGE_KEY = "spendwise.expenses.v1";
+const BUDGET_STORAGE_KEY = "spendwise.monthly-budgets.v1";
+const MAX_AMOUNT = 100000000;
 const CATEGORIES = [
   "Food & Dining",
   "Transport",
@@ -50,8 +52,14 @@ const editNameInput = document.getElementById("editExpenseName");
 const editAmountInput = document.getElementById("editExpenseAmount");
 const editCategoryInput = document.getElementById("editExpenseCategory");
 const editDateInput = document.getElementById("editExpenseDate");
+const budgetForm = document.getElementById("monthlyBudgetForm");
+const budgetInput = document.getElementById("monthlyBudgetAmount");
+const budgetProgressSection = document.getElementById("budgetProgressSection");
+const budgetEmpty = document.getElementById("budgetEmpty");
+const budgetProgressTrack = document.getElementById("budgetProgressTrack");
 
 let expenses = loadExpenses();
+let budgets = loadBudgets();
 let toastTimer;
 let editingExpenseId = null;
 let editTrigger = null;
@@ -106,12 +114,58 @@ function loadExpenses() {
   }
 }
 
+function loadBudgets() {
+  try {
+    const storedValue = localStorage.getItem(BUDGET_STORAGE_KEY);
+    if (storedValue === null) {
+      return {};
+    }
+
+    const parsed = JSON.parse(storedValue);
+    if (
+      parsed === null ||
+      typeof parsed !== "object" ||
+      Array.isArray(parsed) ||
+      !Object.entries(parsed).every(
+        ([month, amount]) =>
+          /^\d{4}-(0[1-9]|1[0-2])$/.test(month) &&
+          Number.isFinite(amount) &&
+          amount > 0 &&
+          amount <= MAX_AMOUNT,
+      )
+    ) {
+      throw new Error("Saved monthly budgets are not in the expected format.");
+    }
+    return parsed;
+  } catch (error) {
+    window.setTimeout(() => {
+      showToast(
+        error instanceof SyntaxError
+          ? "Saved budget data could not be read. Set a new monthly budget to get started."
+          : "Saved budgets could not be loaded. Your existing data was left untouched.",
+        true,
+      );
+    }, 0);
+    return {};
+  }
+}
+
 function saveExpenses(nextExpenses) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextExpenses));
     return true;
   } catch (error) {
     showToast("Could not save your changes. Check your browser storage and try again.", true);
+    return false;
+  }
+}
+
+function saveBudgets(nextBudgets) {
+  try {
+    localStorage.setItem(BUDGET_STORAGE_KEY, JSON.stringify(nextBudgets));
+    return true;
+  } catch (error) {
+    showToast("Could not save your budget. Check your browser storage and try again.", true);
     return false;
   }
 }
@@ -155,6 +209,11 @@ function currentMonthExpenses() {
   });
 }
 
+function currentMonthKey() {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function showToast(message, isError = false) {
   window.clearTimeout(toastTimer);
   toast.textContent = message;
@@ -196,6 +255,53 @@ function renderSummary() {
   document.getElementById("monthSpent").textContent = formatCurrency(monthTotal);
   document.getElementById("expenseCount").textContent = String(expenses.length);
   document.getElementById("monthLabel").textContent = `Spent in ${monthName}`;
+}
+
+function renderBudget() {
+  const monthKey = currentMonthKey();
+  const budget = budgets[monthKey];
+  const monthSpent = currentMonthExpenses().reduce((sum, expense) => sum + expense.amount, 0);
+  const monthName = new Intl.DateTimeFormat("en-IN", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+  const hasBudget = Number.isFinite(budget) && budget > 0;
+  const emptyMessage = document.getElementById("budgetEmpty");
+  const progressSection = document.getElementById("budgetProgressSection");
+  const budgetPanel = document.getElementById("monthlyBudget");
+  const clearButton = document.getElementById("clearMonthlyBudget");
+
+  document.getElementById("budgetMonthLabel").textContent = `Your limit for ${monthName}.`;
+  document.getElementById("budgetHeading").textContent = hasBudget
+    ? "Your monthly budget"
+    : "Set a monthly budget";
+  document.getElementById("saveBudgetButton").innerHTML = hasBudget
+    ? 'Update monthly budget <span aria-hidden="true">→</span>'
+    : 'Set monthly budget <span aria-hidden="true">→</span>';
+  emptyMessage.hidden = hasBudget;
+  progressSection.hidden = !hasBudget;
+  clearButton.hidden = !hasBudget;
+  budgetPanel.classList.toggle("over-budget", hasBudget && monthSpent > budget);
+
+  if (!hasBudget) {
+    return;
+  }
+
+  const percentage = Math.min((monthSpent / budget) * 100, 100);
+  const roundedPercentage = Math.round((monthSpent / budget) * 100);
+  const remaining = budget - monthSpent;
+  const progressText = `${formatCurrency(monthSpent)} of ${formatCurrency(budget)}`;
+  const statusText =
+    remaining >= 0
+      ? `${formatCurrency(remaining)} left in your budget this month.`
+      : `${formatCurrency(Math.abs(remaining))} over your budget this month.`;
+
+  budgetInput.value = String(budget);
+  document.getElementById("budgetProgressAmounts").textContent = progressText;
+  document.getElementById("budgetProgressFill").style.width = `${percentage}%`;
+  budgetProgressTrack.setAttribute("aria-valuenow", String(Math.min(roundedPercentage, 100)));
+  budgetProgressTrack.setAttribute("aria-valuetext", `${progressText}; ${roundedPercentage}% used`);
+  document.getElementById("budgetStatus").textContent = statusText;
 }
 
 function renderTransactions() {
@@ -325,6 +431,7 @@ function renderBreakdown() {
 
 function render() {
   renderSummary();
+  renderBudget();
   updateCategoryFilter();
   renderTransactions();
   renderBreakdown();
@@ -344,7 +451,7 @@ form.addEventListener("submit", (event) => {
     nameInput.setCustomValidity("");
     return;
   }
-  if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) {
+  if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_AMOUNT) {
     amountInput.setCustomValidity("Enter an amount greater than ₹0 and no more than ₹10 crore.");
     amountInput.reportValidity();
     amountInput.setCustomValidity("");
@@ -374,6 +481,40 @@ form.addEventListener("submit", (event) => {
   render();
   nameInput.focus();
   showToast("Expense added. Your totals are up to date.");
+});
+
+budgetForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const amount = Number(budgetInput.value);
+  if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_AMOUNT) {
+    budgetInput.setCustomValidity("Enter a budget greater than ₹0 and no more than ₹10 crore.");
+    budgetInput.reportValidity();
+    budgetInput.setCustomValidity("");
+    return;
+  }
+
+  const nextBudgets = { ...budgets, [currentMonthKey()]: amount };
+  if (!saveBudgets(nextBudgets)) {
+    return;
+  }
+
+  budgets = nextBudgets;
+  renderBudget();
+  showToast("Monthly budget saved.");
+});
+
+document.getElementById("clearMonthlyBudget").addEventListener("click", () => {
+  const nextBudgets = { ...budgets };
+  delete nextBudgets[currentMonthKey()];
+  if (!saveBudgets(nextBudgets)) {
+    return;
+  }
+
+  budgets = nextBudgets;
+  budgetInput.value = "";
+  renderBudget();
+  showToast("Monthly budget removed.");
 });
 
 expenseList.addEventListener("click", (event) => {
